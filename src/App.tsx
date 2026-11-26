@@ -6,6 +6,7 @@ import ProjectList from "./components/ProjectList";
 import Sources from "./components/Sources";
 import AudioSubtitle from "./components/AudioSubtitle";
 import KineticStyle from "./components/KineticStyle";
+import Process from "./components/Process";
 
 interface Draft {
   project: Project | null;
@@ -93,7 +94,17 @@ export default function App() {
         {step === 3 && (
           <KineticStyle config={config} onChange={(c) => saveConfig(c, mode, project)} />
         )}
-        {step === 4 && <div className="step-title">Process</div>}
+        {step === 4 && (
+          <Process
+            project={project}
+            config={config}
+            onDone={() => {
+              import("./lib/api").then(({ updateProject }) =>
+                updateProject({ ...project, status: "rendered" }).catch(() => {}),
+              );
+            }}
+          />
+        )}
       </main>
 
       <footer className="footer">

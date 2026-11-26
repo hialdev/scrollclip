@@ -79,6 +79,31 @@ textarea { resize: vertical; width: 420px; }
   height: 160px;
 }
 
+.process-summary {
+  display: flex; gap: 24px; margin-bottom: 20px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 18px; font-size: 14px;
+  color: var(--text-dim); flex-wrap: wrap;
+}
+.process-summary strong { color: var(--text); }
+
+.log-box {
+  margin-top: 16px;
+  background: #05070c;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  font-family: "SFMono", "Fira Code", monospace;
+  font-size: 12px;
+  min-height: 220px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+.log-line { padding: 2px 0; color: var(--text-dim); }
+.log-info { color: #8ab4f8; }
+.log-success { color: var(--accent); }
+.log-error { color: var(--danger); }
+
 .sources-section {
   margin-bottom: 32px;
 }

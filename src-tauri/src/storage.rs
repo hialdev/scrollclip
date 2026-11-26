@@ -1,8 +1,8 @@
 use rusqlite::{Connection, Result};
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
-pub struct Db(pub Mutex<Connection>);
+pub struct Db(pub Arc<Mutex<Connection>>);
 
 pub fn init_db(dir: PathBuf) -> Result<Connection> {
     std::fs::create_dir_all(&dir).ok();
@@ -22,6 +22,12 @@ pub fn migrate(conn: &Connection) -> Result<()> {
              config TEXT NOT NULL DEFAULT '{}',
              created_at TEXT NOT NULL,
              updated_at TEXT NOT NULL
+         CREATE TABLE IF NOT EXISTS processing_logs (
+             id INTEGER PRIMARY KEY AUTOINCREMENT,
+             project_id TEXT NOT NULL,
+             ts TEXT NOT NULL,
+             level TEXT NOT NULL,
+             message TEXT NOT NULL
          );",
     )
 }

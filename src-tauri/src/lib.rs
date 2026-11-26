@@ -2,6 +2,7 @@
 mod storage;
 mod project;
 mod media;
+mod process;
 
 use tauri::Manager;
 
@@ -12,7 +13,7 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle();
             let db = storage::init_db(handle.path().app_data_dir()?)?;
-            app.manage(storage::Db(std::sync::Mutex::new(db)));
+            app.manage(storage::Db(std::sync::Arc::new(std::sync::Mutex::new(db))));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -24,6 +25,8 @@ pub fn run() {
             media::probe_video,
             media::yt_dlp_info,
             media::yt_dlp_download,
+            process::process_project,
+            process::get_logs,
         ])
         .run(tauri::generate_context!())
         .expect("error while running ScrollClip");

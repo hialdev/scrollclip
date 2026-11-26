@@ -13,6 +13,11 @@ export interface Project {
 
 export const isTauri = () => "__TAURI_INTERNALS__" in window;
 
+const uuid = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+
 const LS_KEY = "scrollclip.projects";
 
 function lsLoad(): Project[] {
@@ -34,7 +39,7 @@ export async function createProject(
   if (isTauri()) return invoke("create_project", { title, mode, config });
   const now = new Date().toISOString();
   const p: Project = {
-    id: crypto.randomUUID(),
+    id: uuid(),
     title,
     mode,
     status: "draft",
