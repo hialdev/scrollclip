@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
+import { Box, Button, IconButton, Step, StepButton, Stepper, Tooltip, Typography } from "@mui/material";
 import { WIZARD_STEPS, type EditMode, type ProjectConfig } from "./lib/types";
-import type { Project } from "./lib/api";
+import { updateProject, type Project } from "./lib/api";
 import ModeSelect from "./components/ModeSelect";
 import ProjectList from "./components/ProjectList";
 import Sources from "./components/Sources";
@@ -10,9 +11,68 @@ import KineticStyle from "./components/KineticStyle";
 import Process from "./components/Process";
 
 interface Draft {
-  project: Project | null;
+  project: Project;
   mode: EditMode | null;
   config: ProjectConfig;
+}
+
+function HeaderTitle({ project }: { project: Project }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(project.title);
+
+  const commit = () => {
+    setEditing(false);
+    const t = value.trim();
+    if (t && t !== project.title) {
+      updateProject({ ...project, title: t }).catch(() => {});
+      window.dispatchEvent(new CustomEvent("scrollclip:renamed", { detail: { id: project.id, title: t } }));
+    } else {
+      setValue(project.title);
+    }
+  };
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commit();
+          if (e.key === "Escape") {
+            setValue(project.title);
+            setEditing(false);
+          }
+        }}
+        style={{
+          background: "transparent",
+          border: "none",
+          borderBottom: "2px solid #4cc0ce",
+          color: "inherit",
+          font: "inherit",
+          fontWeight: 800,
+          fontSize: "1rem",
+          outline: "none",
+        }}
+      />
+    );
+  }
+  return (
+    <Tooltip title="Double-click to rename">
+      <Typography
+        variant="h6"
+        component="span"
+        onDoubleClick={() => {
+          setValue(project.title);
+          setEditing(true);
+        }}
+        sx={{ cursor: "text", userSelect: "none" }}
+      >
+        {project.title}
+      </Typography>
+    </Tooltip>
+  );
 }
 
 export default function App() {
@@ -25,107 +85,88 @@ export default function App() {
   };
   const backToList = () => setDraft(null);
 
-  const saveConfig = async (config: ProjectConfig, mode: EditMode | null, project: Project | null) => {
-    if (!project || !mode) return;
-    const { updateProject } = await import("./lib/api");
-    const updated = { ...project, mode, config };
-    setDraft({ project: updated, mode, config });
-    updateProject(updated).catch(() => {});
+  const saveConfig = (config: ProjectConfig, mode: EditMode | null, project: Project) => {
+    setDraft({ project, mode, config });
+    if (mode) updateProject({ ...project, mode, config }).catch(() => {});
   };
 
   // ---- Home (project list) ----
   if (!draft) {
     return (
-      <div className="app">
+      <Box className="app">
         <header className="header">
-          <div className="logo">
-            Scroll<span>Clip</span>
-          </div>
+          <span className="logo-mark">
+            <Icon icon="lucide:clapperboard" width={18} height={18} />
+          </span>
+          <Typography variant="h6" component="span" sx={{ fontWeight: 800 }}>
+            Scroll<span style={{ color: "#4cc0ce" }}>Clip</span>
+          </Typography>
         </header>
         <main className="content">
           <ProjectList onOpen={openProject} />
         </main>
-      </div>
+      </Box>
     );
   }
 
   // ---- Wizard ----
-  const { project: proj, mode, config } = draft;
-  const project = proj!;
-  const canNext = step === 0 ? mode !== null : true;
+  const { project, mode, config } = draft;
+  const canNext = step !== 0 || mode !== null;
 
   return (
-    <div className="app">
+    <Box className="app">
       <header className="header">
-        <button onClick={backToList} title="Back to projects" aria-label="Back to projects">
-          <Icon icon="lucide:arrow-left" width={16} height={16} />
-        </button>
-        <div className="logo">
-          Scroll<span>Clip</span>
-          <span className="project-badge">{project.title}</span>
-        </div>
-        <nav className="stepper">
+        <Tooltip title="Back to projects">
+          <IconButton onClick={backToList} aria-label="Back to projects" size="small">
+            <Icon icon="lucide:arrow-left" width={18} height={18} />
+          </IconButton>
+        </Tooltip>
+        <span className="logo-mark">
+          <Icon icon="lucide:clapperboard" width={18} height={18} />
+        </span>
+        <Typography variant="h6" component="span" sx={{ fontWeight: 800, mr: 2 }}>
+          Scroll<span style={{ color: "#4cc0ce" }}>Clip</span>
+        </Typography>
+        <span className="header-sep" />
+        <HeaderTitle project={project} />
+        <Box sx={{ flex: 1 }} />
+        <Stepper nonLinear activeStep={step} className="stepper">
           {WIZARD_STEPS.map((label, i) => (
-            <span key={label} style={{ display: "contents" }}>
-              <span
-                className={`step-chip ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}
-              >
-                <span className="dot">
-                  {i < step ? <Icon icon="lucide:check" width={12} height={12} /> : i + 1}
-                </span>
+            <Step key={label} completed={i < step}>
+              <StepButton color="inherit" onClick={() => setStep(i)}>
                 {label}
-              </span>
-              {i < WIZARD_STEPS.length - 1 && (
-                <span className="step-arrow">
-                  <Icon icon="lucide:chevron-right" width={14} height={14} />
-                </span>
-              )}
-            </span>
+              </StepButton>
+            </Step>
           ))}
-        </nav>
+        </Stepper>
       </header>
 
       <main className="content">
-        {step === 0 && (
-          <ModeSelect
-            selected={mode}
-            onSelect={(m) => saveConfig(config, m, project)}
-          />
-        )}
-        {step === 1 && (
-          <Sources config={config} onChange={(c) => saveConfig(c, mode, project)} />
-        )}
-        {step === 2 && (
-          <AudioSubtitle config={config} onChange={(c) => saveConfig(c, mode, project)} />
-        )}
-        {step === 3 && (
-          <KineticStyle config={config} onChange={(c) => saveConfig(c, mode, project)} />
-        )}
+        {step === 0 && <ModeSelect selected={mode} onSelect={(m) => saveConfig(config, m, project)} />}
+        {step === 1 && <Sources config={config} onChange={(c) => saveConfig(c, mode, project)} />}
+        {step === 2 && <AudioSubtitle config={config} onChange={(c) => saveConfig(c, mode, project)} />}
+        {step === 3 && <KineticStyle config={config} onChange={(c) => saveConfig(c, mode, project)} />}
         {step === 4 && (
           <Process
             project={project}
             config={config}
-            onDone={() => {
-              import("./lib/api").then(({ updateProject }) =>
-                updateProject({ ...project, status: "rendered" }).catch(() => {}),
-              );
-            }}
+            onDone={() => updateProject({ ...project, status: "rendered" }).catch(() => {})}
           />
         )}
       </main>
 
       <footer className="footer">
-        <button onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
+        <Button variant="outlined" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
           Back
-        </button>
-        <button
-          className="primary"
+        </Button>
+        <Button
+          variant="contained"
           onClick={() => setStep((s) => Math.min(WIZARD_STEPS.length - 1, s + 1))}
           disabled={!canNext || step === WIZARD_STEPS.length - 1}
         >
           Next
-        </button>
+        </Button>
       </footer>
-    </div>
+    </Box>
   );
 }

@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
+import { Alert, Box, Button, Chip, Paper, Stack, Typography } from "@mui/material";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { isTauri, type Project } from "../lib/api";
@@ -25,6 +26,7 @@ export default function Process({
   const [running, setRunning] = useState(false);
   const [output, setOutput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isTauri()) return;
@@ -35,6 +37,10 @@ export default function Process({
       un.then((f) => f());
     };
   }, []);
+
+  useEffect(() => {
+    logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
+  }, [logs.length]);
 
   const start = async () => {
     setRunning(true);
@@ -59,46 +65,82 @@ export default function Process({
     }
   };
 
+  const summary = [
+    { icon: "lucide:film", label: "sources", value: String(config.videos.length) },
+    { icon: "lucide:volume-2", label: "audio", value: config.audio.choice },
+    { icon: "lucide:captions", label: "subs", value: config.subtitle.choice },
+    { icon: "lucide:type", label: "kinetic", value: config.kinetic?.templateId ?? "none" },
+  ];
+
   return (
-    <>
-      <h2 className="step-title">Process</h2>
-      <p className="step-sub">
-        Render your clip as a 9:16 vertical short. Progress and logs stream below.
-      </p>
+    <Stack spacing={3}>
+      <Box>
+        <Typography variant="h4">Process</Typography>
+        <Typography variant="body2" color="text.secondary">
+          Render your clip as a 9:16 vertical short. Progress and logs stream below.
+        </Typography>
+      </Box>
 
-      <div className="process-summary">
-        <div>
-          <strong>{config.videos.length}</strong> video source(s)
-        </div>
-        <div>
-          Audio: <strong>{config.audio.choice}</strong>
-        </div>
-        <div>
-          Subtitles: <strong>{config.subtitle.choice}</strong>
-        </div>
-        <div>
-          Kinetic: <strong>{config.kinetic?.templateId ?? "none"}</strong>
-        </div>
-      </div>
+      <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap", gap: 1.5 }}>
+        {summary.map((s) => (
+          <Paper key={s.label} variant="outlined" sx={{ px: 2, py: 1.25, display: "flex", alignItems: "center", gap: 1.25 }}>
+            <Icon icon={s.icon} width={16} height={16} style={{ color: "var(--mui-palette-primary-main)" }} />
+            <Typography variant="caption" color="text.secondary" sx={{ textTransform: "capitalize" }}>
+              {s.label}
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 700, textTransform: "capitalize" }}>
+              {s.value}
+            </Typography>
+          </Paper>
+        ))}
+      </Stack>
 
-      <div className="add-row">
-        <button className="primary" onClick={start} disabled={running}>
-          {running ? "Rendering…" : <><Icon icon="lucide:play" width={16} height={16} /> Start render</>}
-        </button>
-        {output && <span className="hint">Output: {output}</span>}
-        {error && <span className="error">{error}</span>}
-      </div>
+      <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", alignItems: "center" }}>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={start}
+          disabled={running}
+          startIcon={<Icon icon={running ? "lucide:loader-2" : "lucide:play"} width={18} height={18} />}
+        >
+          {running ? "Rendering…" : "Start render"}
+        </Button>
+        {output && <Chip color="success" label={`Output: ${output}`} variant="outlined" />}
+        {error && <Alert severity="error">{error}</Alert>}
+      </Stack>
 
-      <div className="log-box">
+      <Paper
+        ref={logRef}
+        variant="outlined"
+        sx={{
+          p: 2,
+          minHeight: 260,
+          maxHeight: 420,
+          overflow: "auto",
+          bgcolor: "#0a0c0e",
+          fontFamily: '"JetBrains Mono", ui-monospace, monospace',
+          fontSize: 12,
+          lineHeight: 1.7,
+        }}
+      >
         {logs.length === 0 && !running && (
-          <span className="source-meta">Logs will appear here…</span>
+          <Typography variant="caption" color="text.secondary">
+            Logs will appear here…
+          </Typography>
         )}
         {logs.map((l, i) => (
-          <div key={i} className={`log-line log-${l.level}`}>
+          <div
+            key={i}
+            style={{
+              color:
+                l.level === "error" ? "#ef5350" : l.level === "warn" ? "#ffb74d" : "rgba(232,234,237,0.8)",
+              whiteSpace: "pre-wrap",
+            }}
+          >
             [{l.ts.slice(11, 19)}] {l.level.toUpperCase()}: {l.message}
           </div>
         ))}
-      </div>
-    </>
+      </Paper>
+    </Stack>
   );
 }
