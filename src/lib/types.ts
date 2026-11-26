@@ -65,6 +65,57 @@ export const EDIT_MODES: EditModeInfo[] = [
   },
 ];
 
+export interface VideoSource {
+  id: string;
+  kind: "local" | "online";
+  path: string;
+  title: string;
+  description: string;
+  duration?: number;
+}
+
+export interface ImageSource {
+  id: string;
+  kind: "upload" | "ai";
+  path?: string;
+  prompt?: string;
+}
+
+export type AudioChoice = "none" | "file" | "ai";
+export type SubtitleChoice = "none" | "file" | "ai";
+
+export interface ProjectConfig {
+  videos: VideoSource[];
+  images: ImageSource[];
+  imageSource: "upload" | "ai";
+  audio: { choice: AudioChoice; path?: string; ttsText?: string; voice?: string };
+  subtitle: { choice: SubtitleChoice; path?: string; language?: string };
+  kinetic?: KineticSettings;
+}
+
+export interface KineticSettings {
+  templateId: string;
+  animIn: string;
+  animIdle: string;
+  animOut: string;
+  fontFamily: string;
+  fontSize: number;
+  letterSpacing: number;
+  caps: boolean;
+  colorPrimary: string;
+  colorActive: string;
+  colorAccent: string;
+  words: number;
+}
+
+export const emptyConfig = (): ProjectConfig => ({
+  videos: [],
+  images: [],
+  imageSource: "upload",
+  audio: { choice: "none" },
+  subtitle: { choice: "none" },
+});
+
 export const WIZARD_STEPS = [
   "Mode",
   "Sources",

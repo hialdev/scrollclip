@@ -93,6 +93,12 @@ textarea:focus {
 .logo span {
   color: var(--accent);
 }
+.project-badge {
+  margin-left: 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
 
 .stepper {
   display: flex;

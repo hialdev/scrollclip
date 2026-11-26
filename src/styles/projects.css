@@ -1,0 +1,48 @@
+.app { position: relative; }
+.header-actions { margin-left: auto; }
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.list-header .step-title { margin-bottom: 0; }
+
+.card-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.new-project {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.new-project input { flex: 1; }
+
+.empty-state { color: var(--text-dim); padding: 40px 0; text-align: center; }
+
+.project-list { display: flex; flex-direction: column; gap: 10px; }
+.project-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.project-info {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  cursor: pointer;
+}
+.project-status {
+  font-size: 12px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
