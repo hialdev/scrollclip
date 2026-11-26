@@ -86,8 +86,9 @@ export default function App() {
   const backToList = () => setDraft(null);
 
   const saveConfig = (config: ProjectConfig, mode: EditMode | null, project: Project) => {
-    setDraft({ project, mode, config });
-    if (mode) updateProject({ ...project, mode, config }).catch(() => {});
+    const p = mode ? { ...project, mode } : project;
+    setDraft({ project: p, mode, config });
+    if (mode) updateProject({ ...p, mode, config }).catch(() => {});
   };
 
   // ---- Home (project list) ----

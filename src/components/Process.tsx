@@ -47,14 +47,27 @@ export default function Process({
     setError(null);
     setLogs([]);
     try {
-      const inputs = config.videos.map((v) => v.path);
-      if (inputs.length === 0) throw new Error("Add at least one video source first");
+      const hasVideo = config.videos.some((v) => v.path);
+      const hasImage = config.images.some((i) => i.path);
+      if (project.mode === "clip_from_images" ? !hasImage : !hasVideo) {
+        throw new Error(
+          project.mode === "clip_from_images"
+            ? "Add at least one image first"
+            : "Add at least one video source first",
+        );
+      }
       const out = await invoke<string>("process_project", {
         projectId: project.id,
-        inputPaths: inputs,
+        mode: project.mode,
+        config: {
+          videos: config.videos.map((v) => ({ path: v.path, title: v.title })),
+          images: config.images.map((i) => ({ path: i.path ?? null, kind: i.kind, prompt: i.prompt ?? null })),
+          imageSource: config.imageSource,
+          kinetic: config.kinetic ?? {},
+        },
         outputDir: `${project.id}-output`,
         audioPath: config.audio.choice === "file" ? config.audio.path ?? null : null,
-        assPath: null,
+        srtPath: config.subtitle.choice === "file" ? config.subtitle.path ?? null : null,
       });
       setOutput(out);
       onDone();

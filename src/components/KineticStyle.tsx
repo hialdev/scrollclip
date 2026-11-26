@@ -131,19 +131,43 @@ function KineticPreview({ k }: { k: KineticSettings }) {
 
   const wrapper: React.CSSProperties =
     k.templateId === "rounded_box"
-      ? { border: `3px solid ${k.colorAccent}`, borderRadius: 999, padding: "0.2em 0.5em", display: "inline-block" }
+      ? {
+          border: `3px solid ${k.colorAccent}`,
+          borderRadius: 999,
+          padding: "0.2em 0.5em",
+          display: "inline",
+          WebkitBoxDecorationBreak: "clone",
+          boxDecorationBreak: "clone",
+          boxSizing: "border-box",
+        }
       : k.templateId === "paper"
-        ? { background: "#f5f1e6", padding: "0.3em 0.6em", display: "inline-block", boxShadow: "0 6px 20px rgba(0,0,0,0.4)" }
+        ? {
+            background: "#f5f1e6",
+            padding: "0.3em 0.6em",
+            display: "inline",
+            WebkitBoxDecorationBreak: "clone",
+            boxDecorationBreak: "clone",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+          }
         : {};
 
+  /* Animations run per word (staggered), not on one wrapper span. The
+     paper/rounded box decoration lives on an inline span around the words, so
+     when the chunk wraps onto 2+ lines each line fragment gets its own box
+     (box-decoration-break: clone) instead of one box around everything. */
   return (
-    <div style={{ ...base, ...wrapper }}>
-      <span
-        key={`${chunk}-${phase}-${k.animIn}-${k.animIdle}-${k.animOut}-${k.templateId}`}
-        style={{ display: "inline-block", animation: anim }}
-      >
+    <div style={{ ...base, maxWidth: "100%" }}>
+      <span key={`${chunk}-${phase}-${k.animIn}-${k.animIdle}-${k.animOut}-${k.templateId}`} style={wrapper}>
         {words.map((w, i) => (
-          <span key={i} style={{ ...wordStyle(i), display: "inline-block", whiteSpace: "pre" }}>
+          <span
+            key={i}
+            style={{
+              ...wordStyle(i),
+              display: "inline-block",
+              whiteSpace: "pre",
+              animation: anim ? `${anim}${i > 0 ? ` ${i * 90}ms` : ""}` : undefined,
+            }}
+          >
             {w}
             {i < words.length - 1 ? " " : ""}
           </span>

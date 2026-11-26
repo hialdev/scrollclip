@@ -3,6 +3,8 @@ mod storage;
 mod project;
 mod media;
 mod process;
+mod kinetic;
+mod subs;
 
 use tauri::Manager;
 

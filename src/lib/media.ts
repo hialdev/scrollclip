@@ -34,6 +34,17 @@ export async function pickSrtFile(): Promise<string | null> {
   return typeof sel === "string" ? sel : null;
 }
 
+export async function pickImageFiles(): Promise<string[]> {
+  if (!isTauri()) return [];
+  const { open } = await import("@tauri-apps/plugin-dialog");
+  const sel = await open({
+    multiple: true,
+    filters: [{ name: "Image", extensions: ["png", "jpg", "jpeg", "webp", "gif", "avif"] }],
+  });
+  if (Array.isArray(sel)) return sel;
+  return typeof sel === "string" ? [sel] : [];
+}
+
 export interface YtMeta {
   title: string;
   duration: number | null;

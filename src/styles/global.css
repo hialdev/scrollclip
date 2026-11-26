@@ -56,10 +56,24 @@ body {
 .stepper {
   flex: 1;
   min-width: 0;
+  max-width: 620px;
+  overflow: hidden;
+}
+.stepper .MuiStep-root {
+  min-width: 0;
+}
+.stepper .MuiStepButton-root {
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 .stepper .MuiStepLabel-label {
   font-size: 0.8rem;
   font-weight: 600;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .content {

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { convertFileSrc } from "@tauri-apps/api/core";
 import { Icon } from "@iconify/react";
 import {
   Alert,
@@ -7,7 +8,6 @@ import {
   Chip,
   FormControlLabel,
   IconButton,
-  InputAdornment,
   Paper,
   Radio,
   RadioGroup,
@@ -19,10 +19,12 @@ import type { ImageSource, ProjectConfig, VideoSource } from "../lib/types";
 import {
   newImageSource,
   newVideoSource,
+  pickImageFiles,
   pickVideoFile,
   probeVideo,
   ytdlpInfo,
 } from "../lib/media";
+import { isTauri } from "../lib/api";
 
 export default function Sources({
   config,
@@ -35,6 +37,8 @@ export default function Sources({
   const [urlTitle, setUrlTitle] = useState("");
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previews, setPreviews] = useState<Record<string, string>>({});
 
   const setVideos = (videos: VideoSource[]) => onChange({ ...config, videos });
   const setImages = (images: ImageSource[]) => onChange({ ...config, images });
@@ -121,6 +125,7 @@ export default function Sources({
             onClick={addOnline}
             disabled={fetching || !url.trim()}
             startIcon={fetching ? <Icon icon="lucide:loader-2" width={16} height={16} /> : <Icon icon="lucide:globe" width={16} height={16} />}
+            sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
           >
             {fetching ? "Fetching…" : "Add online"}
           </Button>
@@ -195,28 +200,85 @@ export default function Sources({
           </RadioGroup>
         </Stack>
         {config.imageSource === "upload" ? (
-          <TextField
-            fullWidth
-            placeholder="Image file path (or add later from file dialog in desktop app)"
-            value={config.images[0]?.path ?? ""}
-            onChange={(e) => {
-              const path = e.target.value;
-              setImages(
-                path
-                  ? [newImageSource("upload", path), ...config.images.slice(1)]
-                  : config.images.slice(1),
-              );
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Icon icon="lucide:image" width={16} height={16} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
+          <Box>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={(e) => {
+                const files = Array.from(e.target.files ?? []);
+                if (!files.length) return;
+                const urls: Record<string, string> = {};
+                const sources = files.map((f) => {
+                  const src = newImageSource("upload", f.name);
+                  urls[src.id] = URL.createObjectURL(f);
+                  return src;
+                });
+                setPreviews((p) => ({ ...p, ...urls }));
+                setImages([...sources, ...config.images]);
+                e.target.value = "";
+              }}
+            />
+            <Button
+              variant="outlined"
+              startIcon={<Icon icon="lucide:image-plus" width={18} height={18} />}
+              onClick={async () => {
+                if (isTauri()) {
+                  const paths = await pickImageFiles();
+                  if (paths.length) setImages([...paths.map((p) => newImageSource("upload", p)), ...config.images]);
+                } else {
+                  fileInputRef.current?.click();
+                }
+              }}
+            >
+              Upload images
+            </Button>
+            {config.images.length > 0 && (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, mt: 2 }}>
+                {config.images.map((img) => (
+                  <Box
+                    key={img.id}
+                    sx={{
+                      position: "relative",
+                      width: 96,
+                      height: 96,
+                      borderRadius: 2,
+                      overflow: "hidden",
+                      border: "1px solid",
+                      borderColor: "divider",
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={previews[img.id] ?? (isTauri() && img.path ? convertFileSrc(img.path) : undefined)}
+                      alt={img.path ?? "image"}
+                      sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                    <IconButton
+                      size="small"
+                      aria-label={`Remove image ${img.path ?? ""}`}
+                      onClick={() => {
+                        setPreviews(({ [img.id]: _gone, ...rest }) => rest);
+                        setImages(config.images.filter((x) => x.id !== img.id));
+                      }}
+                      sx={{
+                        position: "absolute",
+                        top: 2,
+                        right: 2,
+                        bgcolor: "rgba(0,0,0,0.6)",
+                        color: "#fff",
+                        "&:hover": { bgcolor: "rgba(0,0,0,0.8)" },
+                      }}
+                    >
+                      <Icon icon="lucide:x" width={14} height={14} />
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
         ) : (
           <TextField
             fullWidth

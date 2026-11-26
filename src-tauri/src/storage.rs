@@ -22,6 +22,7 @@ pub fn migrate(conn: &Connection) -> Result<()> {
              config TEXT NOT NULL DEFAULT '{}',
              created_at TEXT NOT NULL,
              updated_at TEXT NOT NULL
+         );
          CREATE TABLE IF NOT EXISTS processing_logs (
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              project_id TEXT NOT NULL,
