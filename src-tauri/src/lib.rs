@@ -1,6 +1,7 @@
 // ScrollClip Rust backend — command modules are registered in run().
 mod storage;
 mod project;
+mod media;
 
 use tauri::Manager;
 
@@ -20,6 +21,9 @@ pub fn run() {
             project::get_project,
             project::update_project,
             project::delete_project,
+            media::probe_video,
+            media::yt_dlp_info,
+            media::yt_dlp_download,
         ])
         .run(tauri::generate_context!())
         .expect("error while running ScrollClip");

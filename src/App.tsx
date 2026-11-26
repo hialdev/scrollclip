@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { WIZARD_STEPS, type EditMode, type ProjectConfig, EDIT_MODES } from "./lib/types";
+import { WIZARD_STEPS, type EditMode, type ProjectConfig } from "./lib/types";
 import type { Project } from "./lib/api";
 import ModeSelect from "./components/ModeSelect";
 import ProjectList from "./components/ProjectList";
+import Sources from "./components/Sources";
 
 interface Draft {
   project: Project | null;
@@ -48,7 +49,6 @@ export default function App() {
   const { project: proj, mode, config } = draft;
   const project = proj!;
   const canNext = step === 0 ? mode !== null : true;
-  const modeTitle = mode ? EDIT_MODES.find((m) => m.id === mode)?.title : "";
 
   return (
     <div className="app">
@@ -82,7 +82,9 @@ export default function App() {
             onSelect={(m) => saveConfig(config, m, project)}
           />
         )}
-        {step === 1 && <div className="step-title">Sources — {modeTitle}</div>}
+        {step === 1 && (
+          <Sources config={config} onChange={(c) => saveConfig(c, mode, project)} />
+        )}
         {step === 2 && <div className="step-title">Audio &amp; Subs</div>}
         {step === 3 && <div className="step-title">Kinetic Style</div>}
         {step === 4 && <div className="step-title">Process</div>}
