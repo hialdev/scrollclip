@@ -416,6 +416,26 @@ mod tests {
     }
 
     #[test]
+    fn render_final_clip_maker_vertical_with_subs() {
+        // End-to-end: vertical 720x1280 source + kinetic SRT -> 9:16 short.
+        let out_dir = std::env::temp_dir().join(format!("sc-e2e-final-{}", std::process::id()));
+        let out = render_sync(
+            "clip_maker",
+            render_config(&["/tmp/sc-test/phone_source.mp4"], &[]),
+            out_dir.to_str().unwrap(),
+            None,
+            Some("/tmp/sc-test/phone.srt"),
+            |level, msg| eprintln!("[{level}] {msg}"),
+        ).unwrap();
+        let (dur, w, h) = probe_clip(&out);
+        assert!((dur - 5.0).abs() < 1.5, "expected ~5s, got {dur}");
+        assert_eq!((w, h), (1080.0, 1920.0));
+        eprintln!("FINAL RENDER: {out}");
+        let _ = std::fs::remove_file(&out);
+        let _ = std::fs::remove_dir_all(&out_dir);
+    }
+
+    #[test]
     fn render_ranking_two_videos_with_subs() {
         let out_dir = std::env::temp_dir().join(format!("sc-e2e-rank-{}", std::process::id()));
         let out = render_sync(
