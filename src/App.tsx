@@ -4,6 +4,8 @@ import type { Project } from "./lib/api";
 import ModeSelect from "./components/ModeSelect";
 import ProjectList from "./components/ProjectList";
 import Sources from "./components/Sources";
+import AudioSubtitle from "./components/AudioSubtitle";
+import KineticStyle from "./components/KineticStyle";
 
 interface Draft {
   project: Project | null;
@@ -85,8 +87,12 @@ export default function App() {
         {step === 1 && (
           <Sources config={config} onChange={(c) => saveConfig(c, mode, project)} />
         )}
-        {step === 2 && <div className="step-title">Audio &amp; Subs</div>}
-        {step === 3 && <div className="step-title">Kinetic Style</div>}
+        {step === 2 && (
+          <AudioSubtitle config={config} onChange={(c) => saveConfig(c, mode, project)} />
+        )}
+        {step === 3 && (
+          <KineticStyle config={config} onChange={(c) => saveConfig(c, mode, project)} />
+        )}
         {step === 4 && <div className="step-title">Process</div>}
       </main>
 
