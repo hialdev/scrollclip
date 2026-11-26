@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from "@iconify/react";
 import { WIZARD_STEPS, type EditMode, type ProjectConfig } from "./lib/types";
 import type { Project } from "./lib/api";
 import ModeSelect from "./components/ModeSelect";
@@ -56,8 +57,8 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <button onClick={backToList} title="Back to projects">
-          ←
+        <button onClick={backToList} title="Back to projects" aria-label="Back to projects">
+          <Icon icon="lucide:arrow-left" width={16} height={16} />
         </button>
         <div className="logo">
           Scroll<span>Clip</span>
@@ -69,10 +70,16 @@ export default function App() {
               <span
                 className={`step-chip ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}
               >
-                <span className="dot">{i < step ? "✓" : i + 1}</span>
+                <span className="dot">
+                  {i < step ? <Icon icon="lucide:check" width={12} height={12} /> : i + 1}
+                </span>
                 {label}
               </span>
-              {i < WIZARD_STEPS.length - 1 && <span className="step-arrow">→</span>}
+              {i < WIZARD_STEPS.length - 1 && (
+                <span className="step-arrow">
+                  <Icon icon="lucide:chevron-right" width={14} height={14} />
+                </span>
+              )}
             </span>
           ))}
         </nav>

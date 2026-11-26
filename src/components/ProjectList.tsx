@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Icon } from "@iconify/react";
 import { EDIT_MODES, emptyConfig, type EditMode } from "../lib/types";
 import { createProject, deleteProject, isTauri, listProjects, type Project } from "../lib/api";
 
@@ -33,7 +34,7 @@ export default function ProjectList({ onOpen }: { onOpen: (p: Project) => void }
       <div className="list-header">
         <h2 className="step-title">Your projects</h2>
         <button className="primary" onClick={() => setCreating(true)}>
-          + New Project
+          <Icon icon="lucide:plus" width={16} height={16} /> New Project
         </button>
       </div>
 
@@ -75,8 +76,13 @@ export default function ProjectList({ onOpen }: { onOpen: (p: Project) => void }
               <span className="mode-sub">{modeTitle(p.mode)}</span>
               <span className="project-status">{p.status}</span>
             </div>
-            <button onClick={() => handleDelete(p.id)} title="Delete">
-              🗑
+            <button
+              className="icon-btn danger"
+              onClick={() => handleDelete(p.id)}
+              aria-label={`Delete ${p.title}`}
+              title="Delete"
+            >
+              <Icon icon="lucide:trash-2" width={16} height={16} />
             </button>
           </div>
         ))}

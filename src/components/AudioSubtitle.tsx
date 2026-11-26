@@ -1,5 +1,17 @@
 import type { ProjectConfig } from "../lib/types";
+import { Icon } from "@iconify/react";
 import { pickAudioFile, pickSrtFile } from "../lib/media";
+
+const AUDIO_ICONS: Record<string, string> = {
+  none: "lucide:volume-x",
+  file: "lucide:file-audio",
+  ai: "lucide:sparkles",
+};
+const SUB_ICONS: Record<string, string> = {
+  none: "lucide:captions-off",
+  file: "lucide:file-text",
+  ai: "lucide:sparkles",
+};
 
 export default function AudioSubtitle({
   config,
@@ -32,6 +44,7 @@ export default function AudioSubtitle({
                 checked={audio.choice === v}
                 onChange={() => onChange({ ...config, audio: { ...audio, choice: v } })}
               />
+              <Icon icon={AUDIO_ICONS[v]} width={16} height={16} />
               {label}
             </label>
           ))}
@@ -91,6 +104,7 @@ export default function AudioSubtitle({
                 checked={subtitle.choice === v}
                 onChange={() => onChange({ ...config, subtitle: { ...subtitle, choice: v } })}
               />
+              <Icon icon={SUB_ICONS[v]} width={16} height={16} />
               {label}
             </label>
           ))}

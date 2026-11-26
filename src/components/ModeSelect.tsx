@@ -1,12 +1,13 @@
 import { EDIT_MODES, type EditMode } from "../lib/types";
+import { Icon } from "@iconify/react";
 
 const ICONS: Record<string, string> = {
-  moment: "⚡",
-  maker: "✂️",
-  ranking: "🏆",
-  compilation: "🎬",
-  quotes: "💬",
-  images: "🖼️",
+  moment: "lucide:zap",
+  maker: "lucide:scissors",
+  ranking: "lucide:trophy",
+  compilation: "lucide:film",
+  quotes: "lucide:message-circle",
+  images: "lucide:image",
 };
 
 export default function ModeSelect({
@@ -29,7 +30,7 @@ export default function ModeSelect({
             className={`mode-card ${selected === m.id ? "selected" : ""}`}
             onClick={() => onSelect(m.id)}
           >
-            <span className="mode-icon">{ICONS[m.icon]}</span>
+            <span className="mode-icon"><Icon icon={ICONS[m.icon]} width={16} height={16} /></span>
             <h3>{m.title}</h3>
             <span className="mode-sub">{m.subtitle}</span>
             <p>{m.description}</p>

@@ -10,6 +10,8 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.160",
+    "@iconify/react": "^6.0.4",
     "@tauri-apps/api": "^2.9.0",
     "@tauri-apps/plugin-dialog": "^2.4.0",
     "react": "^18.3.1",

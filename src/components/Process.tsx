@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Icon } from "@iconify/react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { isTauri, type Project } from "../lib/api";
@@ -82,7 +83,7 @@ export default function Process({
 
       <div className="add-row">
         <button className="primary" onClick={start} disabled={running}>
-          {running ? "Rendering…" : "▶ Start render"}
+          {running ? "Rendering…" : <><Icon icon="lucide:play" width={16} height={16} /> Start render</>}
         </button>
         {output && <span className="hint">Output: {output}</span>}
         {error && <span className="error">{error}</span>}

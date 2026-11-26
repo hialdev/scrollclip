@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from "@iconify/react";
 import type { ImageSource, ProjectConfig, VideoSource } from "../lib/types";
 import {
   newImageSource,
@@ -79,7 +80,9 @@ export default function Sources({
         <div className="section-head">
           <h3>Videos</h3>
           <div className="add-row">
-            <button onClick={addLocal}>📁 Local video</button>
+            <button onClick={addLocal}>
+              <Icon icon="lucide:folder" width={16} height={16} /> Local video
+            </button>
           </div>
         </div>
         <div className="add-row online-row">
@@ -101,7 +104,9 @@ export default function Sources({
         {error && <p className="error">{error}</p>}
         {config.videos.map((v) => (
           <div key={v.id} className="source-card">
-            <span className="source-kind">{v.kind === "local" ? "📁" : "🌐"}</span>
+            <span className="source-kind">
+              <Icon icon={v.kind === "local" ? "lucide:folder" : "lucide:globe"} width={16} height={16} />
+            </span>
             <div className="source-main">
               <input
                 value={v.title}
@@ -116,10 +121,12 @@ export default function Sources({
               </span>
             </div>
             <button
+              className="icon-btn danger"
               onClick={() => setVideos(config.videos.filter((x) => x.id !== v.id))}
+              aria-label={`Remove ${v.title}`}
               title="Remove"
             >
-              ✕
+              <Icon icon="lucide:x" width={16} height={16} />
             </button>
           </div>
         ))}
@@ -180,7 +187,9 @@ export default function Sources({
         )}
         {config.images.length > 1 && (
           <div className="source-card">
-            <span className="source-kind">🖼️</span>
+            <span className="source-kind">
+              <Icon icon="lucide:image" width={16} height={16} />
+            </span>
             <div className="source-main">
               <span className="source-meta">
                 {config.images.length - 1} more image(s) queued
